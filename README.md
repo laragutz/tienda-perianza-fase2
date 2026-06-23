@@ -136,6 +136,16 @@ Restaurar respaldo:
 
 ## Seguridad implementada
 
+### API Key
+
+Todos los endpoints requieren el header:
+
+    X-API-KEY: TiendaPerianza2026#
+
+O como query parameter:
+
+    ?api_key=TiendaPerianza2026#
+
 - Firewall UFW habilitado (puertos 22, 80, 443)
 - Nginx como proxy reverso
 - Usuario de BD con privilegios mínimos
