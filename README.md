@@ -1,58 +1,148 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Tienda Perianza
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST para administración de productos desarrollada como parte de la Evaluación Técnica VPS D.
 
-## About Laravel
+## Tecnologías
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **SO:** Ubuntu 24.04 LTS
+- **Backend:** PHP 8.3 + Laravel 11
+- **Base de datos:** PostgreSQL 16
+- **Servidor web:** Nginx 1.24
+- **Documentación API:** Swagger (L5-Swagger)
+- **Exportación:** Maatwebsite Excel
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Arquitectura
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+    Internet → Nginx (puerto 80) → PHP-FPM 8.3 → Laravel 11 → PostgreSQL 16
 
-## Learning Laravel
+## Acceso
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Aplicación:** http://143.244.188.9
+- **API:** http://143.244.188.9/api/productos
+- **Swagger:** http://143.244.188.9/api/documentation
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Endpoints API
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | /api/productos | Consultar productos con filtros |
+| POST | /api/productos | Crear producto |
+| PUT | /api/productos/{id} | Actualizar producto |
+| DELETE | /api/productos/{id} | Eliminar producto (borrado lógico) |
+| GET | /api/productos/export | Exportar a Excel |
 
-## Agentic Development
+### Parámetros GET
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| buscar | string | Busca en nombre, SKU y categoría |
+| categoria | string | Filtra por categoría |
+| fecha_inicio | date | Fecha inicio YYYY-MM-DD |
+| fecha_fin | date | Fecha fin YYYY-MM-DD |
 
-```bash
-composer require laravel/boost --dev
+## Instalación
 
-php artisan boost:install
-```
+### 1. Requisitos
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+    apt install -y postgresql postgresql-contrib php8.3 php8.3-fpm php8.3-pgsql php8.3-mbstring php8.3-xml php8.3-curl php8.3-zip php8.3-bcmath php8.3-intl php8.3-gd nginx git unzip curl
+    curl -sS https://getcomposer.org/installer | php
+    mv composer.phar /usr/local/bin/composer
 
-## Contributing
+### 2. Clonar repositorio
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    cd /var/www
+    git clone https://github.com/perianzanet/tienda-perianza.git
+    cd tienda-perianza
+    composer install
+    cp .env.example .env
+    php artisan key:generate
 
-## Code of Conduct
+### 3. Configurar .env
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+    DB_CONNECTION=pgsql
+    DB_HOST=127.0.0.1
+    DB_PORT=5432
+    DB_DATABASE=tienda_db
+    DB_USERNAME=tienda_user
+    DB_PASSWORD=tu_password
+    SESSION_DRIVER=file
+    CACHE_STORE=file
+    QUEUE_CONNECTION=sync
 
-## Security Vulnerabilities
+### 4. Base de datos
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    sudo -u postgres psql -c "CREATE USER tienda_user WITH PASSWORD 'tu_password';"
+    sudo -u postgres psql -c "CREATE DATABASE tienda_db OWNER tienda_user;"
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE tienda_db TO tienda_user;"
+    sudo -u postgres psql -d tienda_db < database/respaldo_tienda_db.sql
+    sudo -u postgres psql -d tienda_db -c "GRANT ALL PRIVILEGES ON TABLE productos TO tienda_user;"
+    sudo -u postgres psql -d tienda_db -c "GRANT USAGE, SELECT, UPDATE ON SEQUENCE productos_id_seq TO tienda_user;"
+    sudo -u postgres psql -d tienda_db -c "GRANT EXECUTE ON FUNCTION sp_productos(JSON, BOOLEAN) TO tienda_user;"
+    sudo -u postgres psql -d tienda_db -c "GRANT EXECUTE ON FUNCTION sp_productos_get(TEXT, TEXT, DATE, DATE) TO tienda_user;"
 
-## License
+### 5. Permisos
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+    chown -R www-data:www-data /var/www/tienda-perianza
+    chmod -R 775 /var/www/tienda-perianza/storage
+    chmod -R 775 /var/www/tienda-perianza/bootstrap/cache
+
+### 6. Nginx
+
+Crear /etc/nginx/sites-available/tienda-perianza:
+
+    server {
+        listen 80;
+        server_name tu_ip;
+        root /var/www/tienda-perianza/public;
+        index index.php;
+        charset utf-8;
+        location / { try_files $uri $uri/ /index.php?$query_string; }
+        location ~ \.php$ {
+            fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+            fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+            include fastcgi_params;
+        }
+    }
+
+    ln -s /etc/nginx/sites-available/tienda-perianza /etc/nginx/sites-enabled/
+    nginx -t && systemctl restart nginx
+
+### 7. Swagger
+
+    php artisan l5-swagger:generate
+    ln -s /var/www/tienda-perianza/storage/api-docs /var/www/tienda-perianza/public/docs
+
+## Migración MySQL → PostgreSQL
+
+1. Se analizó la estructura de la BD origen tienda_origen 
+2. Se adaptaron los tipos de datos:
+   - INT AUTO_INCREMENT → SERIAL
+   - TINYINT(1) → BOOLEAN
+   - DATETIME → TIMESTAMP
+3. Se crearon stored procedures en PostgreSQL:
+   - sp_productos(json, boolean) — MERGE para INSERT/UPDATE/DELETE lógico
+   - sp_productos_get(text, text, date, date) — consulta con filtros
+4. Se migró la información y verificó integridad con SELECT COUNT(*)
+
+## Respaldo y Restauración
+
+Generar respaldo:
+
+    PGPASSWORD=Tienda2026# pg_dump -U tienda_user -h 127.0.0.1 tienda_db > respaldo_tienda_db.sql
+
+Restaurar respaldo:
+
+    PGPASSWORD=Tienda2026# psql -U tienda_user -h 127.0.0.1 tienda_db < respaldo_tienda_db.sql
+
+## Seguridad implementada
+
+- Firewall UFW habilitado (puertos 22, 80, 443)
+- Nginx como proxy reverso
+- Usuario de BD con privilegios mínimos
+- Validaciones en stored procedures y controlador
+- Borrado lógico mediante campo activo
+
+## Autor
+
+**Eliseo Perianza**
+GitHub: @perianzanet
