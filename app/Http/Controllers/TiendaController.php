@@ -18,6 +18,12 @@ use Exception;
  *     url="http://143.244.188.9",
  *     description="Servidor VPS"
  * )
+ * @OA\SecurityScheme(
+ *     securityScheme="ApiKeyAuth",
+ *     type="apiKey",
+ *     in="header",
+ *     name="X-API-KEY"
+ * )
  */
 class TiendaController extends Controller
 {
@@ -26,12 +32,66 @@ class TiendaController extends Controller
      *     path="/api/productos",
      *     summary="Consultar productos",
      *     tags={"Productos"},
+     *     security={{"ApiKeyAuth":{}}},
      *     @OA\Parameter(name="buscar", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="categoria", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="fecha_inicio", in="query", required=false, @OA\Schema(type="string", format="date")),
      *     @OA\Parameter(name="fecha_fin", in="query", required=false, @OA\Schema(type="string", format="date")),
      *     @OA\Response(response=200, description="Consulta exitosa"),
+     *     @OA\Response(response=401, description="API Key inválida"),
      *     @OA\Response(response=500, description="Error del servidor")
+     * )
+     * @OA\Post(
+     *     path="/api/productos",
+     *     summary="Crear producto",
+     *     tags={"Productos"},
+     *     security={{"ApiKeyAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"nombre","sku","categoria","precio","stock"},
+     *             @OA\Property(property="nombre", type="string"),
+     *             @OA\Property(property="sku", type="string"),
+     *             @OA\Property(property="categoria", type="string"),
+     *             @OA\Property(property="precio", type="number"),
+     *             @OA\Property(property="stock", type="integer"),
+     *             @OA\Property(property="activo", type="boolean")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Registro guardado"),
+     *     @OA\Response(response=401, description="API Key inválida"),
+     *     @OA\Response(response=422, description="Error de validación")
+     * )
+     * @OA\Put(
+     *     path="/api/productos/{id}",
+     *     summary="Actualizar producto",
+     *     tags={"Productos"},
+     *     security={{"ApiKeyAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="nombre", type="string"),
+     *             @OA\Property(property="sku", type="string"),
+     *             @OA\Property(property="categoria", type="string"),
+     *             @OA\Property(property="precio", type="number"),
+     *             @OA\Property(property="stock", type="integer"),
+     *             @OA\Property(property="activo", type="boolean")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Registro actualizado"),
+     *     @OA\Response(response=401, description="API Key inválida"),
+     *     @OA\Response(response=422, description="Error de validación")
+     * )
+     * @OA\Delete(
+     *     path="/api/productos/{id}",
+     *     summary="Eliminar producto (borrado lógico)",
+     *     tags={"Productos"},
+     *     security={{"ApiKeyAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Registro eliminado"),
+     *     @OA\Response(response=401, description="API Key inválida"),
+     *     @OA\Response(response=422, description="ID requerido")
      * )
      */
     public function productos(Request $request, $id = null)
@@ -210,11 +270,13 @@ class TiendaController extends Controller
      *     path="/api/productos/export",
      *     summary="Exportar productos a Excel",
      *     tags={"Productos"},
+     *     security={{"ApiKeyAuth":{}}},
      *     @OA\Parameter(name="buscar", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="categoria", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="fecha_inicio", in="query", required=false, @OA\Schema(type="string", format="date")),
      *     @OA\Parameter(name="fecha_fin", in="query", required=false, @OA\Schema(type="string", format="date")),
      *     @OA\Response(response=200, description="Archivo Excel generado"),
+     *     @OA\Response(response=401, description="API Key inválida"),
      *     @OA\Response(response=500, description="Error al exportar")
      * )
      */
