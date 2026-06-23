@@ -152,6 +152,21 @@ O como query parameter:
 - Validaciones en stored procedures y controlador
 - Borrado lógico mediante campo activo
 
+## Despliegue automatizado
+
+Ejecutar el script de despliegue:
+
+    chmod +x deploy.sh
+    ./deploy.sh
+
+## Credenciales de acceso
+
+- **Usuario servidor:** deploy
+- **Password:** Deploy2026#
+- **API Key:** TiendaPerianza2026#
+- **BD Usuario:** tienda_user
+- **BD Password:** Tienda2026#
+
 ## Autor
 
 **Eliseo Perianza**
