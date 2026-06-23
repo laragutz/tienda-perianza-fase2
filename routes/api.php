@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TiendaController;
 
-Route::controller(TiendaController::class)->prefix('productos')->group(function () {
+Route::middleware('apikey')->controller(TiendaController::class)->prefix('productos')->group(function () {
     Route::get('/',        'productos');
     Route::post('/',       'productos');
     Route::put('/{id}',    'productos');
