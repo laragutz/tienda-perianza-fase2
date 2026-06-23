@@ -1,0 +1,128 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Tienda Perianza API",
+        "description": "API REST para administración de productos - Evaluación Técnica",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://143.244.188.9",
+            "description": "Servidor VPS"
+        }
+    ],
+    "paths": {
+        "/api/productos": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Consultar productos",
+                "operationId": "400eae86648033ed800b2500687783c9",
+                "parameters": [
+                    {
+                        "name": "buscar",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "categoria",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fecha_inicio",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "fecha_fin",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Consulta exitosa"
+                    },
+                    "500": {
+                        "description": "Error del servidor"
+                    }
+                }
+            }
+        },
+        "/api/productos/export": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Exportar productos a Excel",
+                "operationId": "82f28b072ba21fcf14fe8fa0e90740c6",
+                "parameters": [
+                    {
+                        "name": "buscar",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "categoria",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fecha_inicio",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "fecha_fin",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo Excel generado"
+                    },
+                    "500": {
+                        "description": "Error al exportar"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Productos",
+            "description": "Productos"
+        }
+    ]
+}
