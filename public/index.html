@@ -413,8 +413,10 @@ codigo_barras: document.getElementById('form-codigo-barras').value,
     }
 
     function exportar() {
-        window.location.href = `${API}/export?${getParams()}&api_key=${API_KEY}`;
-    }
+    const params = getParams();
+    params.append('api_key', API_KEY);
+    window.location.href = `${API}/export?${params.toString()}`;
+}
 
     function mostrarToast(msg, tipo) {
         const toast = document.getElementById('toast');
