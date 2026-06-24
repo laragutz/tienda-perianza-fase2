@@ -30,7 +30,9 @@ class ProductosExport implements FromCollection, WithHeadings, WithStyles
             $p->id,
             $p->nombre,
             $p->sku,
-            $p->categoria,
+	    $p->categoria,
+	    $p->marca,
+	    $p->codigo_barras,
             number_format($p->precio, 2),
             $p->stock,
             $p->activo ? 'Sí' : 'No',
@@ -40,7 +42,7 @@ class ProductosExport implements FromCollection, WithHeadings, WithStyles
 
     public function headings(): array
     {
-        return ['ID', 'Nombre', 'SKU', 'Categoría', 'Precio', 'Stock', 'Activo', 'Fecha Registro'];
+        return ['ID', 'Nombre', 'SKU', 'Categoría', 'Marca', 'Código de Barras', 'Precio', 'Stock', 'Activo', 'Fecha Registro'];
     }
 
     public function styles(Worksheet $sheet)

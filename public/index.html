@@ -94,6 +94,23 @@
             <label>Fecha fin</label>
             <input type="date" id="fecha_fin">
         </div>
+	<div class="filter-group">
+    <label>Ordenar por</label>
+    <select id="ordenar_por">
+        <option value="id">ID</option>
+        <option value="nombre">Nombre</option>
+        <option value="precio">Precio</option>
+        <option value="stock">Stock</option>
+    </select>
+</div>
+
+<div class="filter-group">
+    <label>Dirección</label>
+    <select id="direccion">
+        <option value="asc">Ascendente</option>
+        <option value="desc">Descendente</option>
+    </select>
+</div>
         <button class="btn btn-primary" onclick="cargarProductos()">Buscar</button>
         <button class="btn btn-secondary" onclick="limpiarFiltros()">Limpiar</button>
     </div>
@@ -111,12 +128,12 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th><th>Nombre</th><th>SKU</th><th>Categoría</th>
-                    <th>Precio</th><th>Stock</th><th>Activo</th><th>Fecha Registro</th><th>Acciones</th>
+                    	<th>ID</th><th>Nombre</th><th>SKU</th><th>Categoría</th><th>Marca</th><th>Código Barras</th>
+			<th>Precio</th><th>Stock</th><th>Activo</th><th>Fecha Registro</th><th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="tabla-body">
-                <tr><td colspan="9" class="loading">Cargando productos...</td></tr>
+                <tr><td colspan="11" class="loading">Cargando productos...</td></tr>
             </tbody>
         </table>
     </div>
@@ -145,6 +162,15 @@
                     <option>Libros</option><option>Juguetes</option><option>Automotriz</option><option>Belleza</option>
                 </select>
             </div>
+	    <div class="form-group">
+    <label>Marca</label>
+    <input type="text" id="form-marca" placeholder="Marca del producto">
+</div>
+
+<div class="form-group">
+    <label>Código de barras</label>
+    <input type="text" id="form-codigo-barras" placeholder="7501234567890">
+</div>
             <div class="form-group">
                 <label>Precio</label>
                 <input type="number" id="form-precio" placeholder="0.00" step="0.01" min="0">
@@ -195,11 +221,15 @@
         const categoria   = document.getElementById('categoria').value;
         const fechaInicio = document.getElementById('fecha_inicio').value;
         const fechaFin    = document.getElementById('fecha_fin').value;
+	const ordenarPor = document.getElementById('ordenar_por').value;
+	const direccion = document.getElementById('direccion').value;
         if (buscar)      params.append('buscar', buscar);
         if (categoria)   params.append('categoria', categoria);
         if (fechaInicio) params.append('fecha_inicio', fechaInicio);
         if (fechaFin)    params.append('fecha_fin', fechaFin);
-        return params;
+        params.append('ordenar_por', ordenarPor);
+	params.append('direccion', direccion);
+	return params;
     }
 
     function formatFecha(f) {
@@ -215,6 +245,8 @@
             <td>${p.nombre}</td>
             <td>${p.sku}</td>
             <td><span class="categoria-badge">${p.categoria}</span></td>
+	    <td>${p.marca || ''}</td>
+	<td>${p.codigo_barras || ''}</td>
             <td class="precio">$${parseFloat(p.precio).toFixed(2)}</td>
             <td>${p.stock}</td>
             <td><span class="activo-badge ${p.activo ? 'activo-si' : 'activo-no'}">${p.activo ? 'Sí' : 'No'}</span></td>
@@ -228,7 +260,7 @@
 
     async function cargarProductos() {
         const tbody = document.getElementById('tabla-body');
-        tbody.innerHTML = '<tr><td colspan="9" class="loading">Cargando...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="loading">Cargando...</td></tr>';
         try {
             const res  = await fetch(`${API}?${getParams()}`, { headers: { 'X-API-KEY': API_KEY } });
             cerrarConfirm();
@@ -237,12 +269,12 @@
             totalProductos = data.length;
             document.getElementById('total-label').textContent = `${totalProductos} producto(s) encontrado(s)`;
             if (!data.length) {
-                tbody.innerHTML = '<tr><td colspan="9" class="empty">No se encontraron productos</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" class="empty">No se encontraron productos</td></tr>';
                 return;
             }
             tbody.innerHTML = data.map(renderFila).join('');
         } catch (e) {
-            tbody.innerHTML = '<tr><td colspan="9" class="empty">Error al cargar</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" class="empty">Error al cargar</td></tr>';
         }
     }
 
@@ -251,6 +283,8 @@
         document.getElementById('categoria').value = '';
         document.getElementById('fecha_inicio').value = '';
         document.getElementById('fecha_fin').value = '';
+	document.getElementById('ordenar_por').value = 'id';
+	document.getElementById('direccion').value = 'asc';
         cargarProductos();
     }
 
@@ -260,6 +294,8 @@
         document.getElementById('form-nombre').value    = producto ? producto.nombre : '';
         document.getElementById('form-sku').value       = producto ? producto.sku : '';
         document.getElementById('form-categoria').value = producto ? producto.categoria : '';
+	    document.getElementById('form-marca').value = producto ? (producto.marca || '') : '';
+document.getElementById('form-codigo-barras').value = producto ? (producto.codigo_barras || '') : '';
         document.getElementById('form-precio').value    = producto ? producto.precio : '';
         document.getElementById('form-stock').value     = producto ? producto.stock : '';
         document.getElementById('form-activo').value    = producto ? String(producto.activo) : 'true';
@@ -275,15 +311,16 @@
         const id = Number(tr.getAttribute('data-id'));
         const celdas = tr.querySelectorAll('td');
         const producto = {
-            id:             id,
-            nombre:         celdas[1].textContent,
-            sku:            celdas[2].textContent,
-            categoria:      celdas[3].textContent,
-            precio:         celdas[4].textContent.replace('$',''),
-            stock:          celdas[5].textContent,
-            activo:         celdas[6].textContent.trim() === 'Sí',
-            fecha_registro: celdas[7].textContent
-        };
+    id:             id,
+    nombre:         celdas[1].textContent,
+    sku:            celdas[2].textContent,
+    categoria:      celdas[3].textContent,
+    marca:          celdas[4].textContent,
+    codigo_barras:  celdas[5].textContent,
+    precio:         celdas[6].textContent.replace('$',''),
+    stock:          celdas[7].textContent,
+    activo:         celdas[8].textContent.trim() === 'Sí'
+};
         abrirModal(producto);
     }
 
@@ -336,6 +373,8 @@
             nombre:    document.getElementById('form-nombre').value,
             sku:       document.getElementById('form-sku').value,
             categoria: document.getElementById('form-categoria').value,
+	marca: document.getElementById('form-marca').value,
+codigo_barras: document.getElementById('form-codigo-barras').value,
             precio:    parseFloat(document.getElementById('form-precio').value),
             stock:     parseInt(document.getElementById('form-stock').value),
             activo:    document.getElementById('form-activo').value === 'true'

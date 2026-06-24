@@ -111,13 +111,28 @@ class TiendaController extends Controller
                 $categoria    = $request->input('categoria');
                 $fechaInicio  = $request->input('fecha_inicio');
                 $fechaFin     = $request->input('fecha_fin');
+$ordenarPor   = $request->input('ordenar_por', 'id');
+$direccion    = $request->input('direccion', 'asc');
 
-                $data = DB::select('SELECT * FROM sp_productos_get(?, ?, ?, ?)', [
-                    $buscar,
-                    $categoria,
-                    $fechaInicio,
-                    $fechaFin
-                ]);
+$ordenesPermitidos = ['id', 'nombre', 'precio', 'stock'];
+$direccionesPermitidas = ['asc', 'desc'];
+
+if (!in_array($ordenarPor, $ordenesPermitidos)) {
+    $ordenarPor = 'id';
+}
+
+if (!in_array($direccion, $direccionesPermitidas)) {
+    $direccion = 'asc';
+}
+
+$data = DB::select('SELECT * FROM sp_productos_get(?, ?, ?, ?, ?, ?)', [
+    $buscar,
+    $categoria,
+    $fechaInicio,
+    $fechaFin,
+    $ordenarPor,
+    $direccion
+]);
 
                 return response()->json([
                     'success' => true,
